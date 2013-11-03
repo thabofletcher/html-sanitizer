@@ -1,11 +1,13 @@
 #!/usr/bin/env node
 var http = require('http');
-var client = require('./client.js');
- 
+var stripper = require('./stripper.js');
+
 http.createServer(function  (request, response) {
-	client.query(request, function(json) {
-    	response.writeHead(200);
-    	response.write(json);
-    	response.end();
+	stripper.query(request.url.substr(1), 
+		function(error) {console.log(error)},
+		function(json) {
+	    	response.writeHead(200);
+	    	response.write(json);
+	    	response.end();
 	});
-}).listen(80);
+}).listen(8888);
