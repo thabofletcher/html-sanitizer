@@ -17,10 +17,12 @@ exports.query = function(url, errorHandler, okHandler) {
             $('head').remove();
             $('script').remove();
             $('textarea').remove();
+            $('select').remove();
             $('input').remove();
             $('font').remove();
             $('style').remove();
             $('center').remove();
+            $('form').remove();
 
             var elements = $('*');
             elements.removeAttr('class');
@@ -39,7 +41,7 @@ exports.query = function(url, errorHandler, okHandler) {
             //     }
             
             //console.log(tagfreq);
-            console.log(simple);
+            console.log(elements);
             //okHandler(elements.html());
             okHandler(JSON.stringify(simple, null, " "));
             }
@@ -47,21 +49,47 @@ exports.query = function(url, errorHandler, okHandler) {
     }
 
 var makeSimple = function(elem) {
-    return { 
-        "tag" : elem.name,
-        "attribs" : elem.attribs,
-        "children" : simplifyKids(elem.children)
-    };
+    var simple = { }
+
+    if (elem.type == "tag") {
+        simple.tag = elem.name;
+        if (notEmpty(elem.attribs)) simple.attribs = elem.attribs;
+        var kids = simplifyKids(elem.children);
+        if (kids && kids.length) {
+            if (kids.length == 1 && kids[0].text) {
+                simple.text = kids[0].text;
+            }
+            else {
+                simple.children = kids;
+            }
+        }
+    }
+    else if (elem.type == "text") {
+        var trimmed = elem.data.trim();
+        if (trimmed) simple.text = trimmed;
+    }
+    // else {
+    //     simple.unkown = elem;
+    // }
+
+    return simple;
 }
 
 var simplifyKids = function(kids) {
     var simpleKids = [];
     if (kids) {
         kids.forEach(function(kid) {
-            simpleKids.push(makeSimple(kid));
+            if (kid) {
+                var simpleKid = makeSimple(kid);
+                if (notEmpty(simpleKid)) simpleKids.push(simpleKid);
+            }
         });
     }
     return simpleKids;
+}
+
+var notEmpty = function(obj) {
+    return Object.keys(obj).length > 0
 }
 
 
