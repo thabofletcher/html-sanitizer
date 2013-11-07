@@ -26,13 +26,10 @@ exports.query = function(url, errorHandler, okHandler) {
 
             var elements = $('*');
             //elements.removeAttr('class');
-            elements.removeAttr('style');
-            elements.removeAttr('bgcolor');
+            //elements.removeAttr('style');
+            //elements.removeAttr('bgcolor');
 
             var simple = makeSimple($('body')[0]);
-
-            //console.log(elements);
-            //okHandler(elements.html());
             okHandler(JSON.stringify(simple, null, " "));
             }
         });
@@ -47,12 +44,8 @@ var makeSimple = function(elem) {
         else simple[elem.name] = {};
 
         var kids = simplifyKids(elem.children);
-        if (kids && kids.length) {
-            // if (empty(simple[elem.name]))
-            //     simple[elem.name] = kids;
-            // else
-                simple[elem.name].children = kids;
-        }
+        if (kids && kids.length)
+            simple[elem.name].children = kids;
     }
     else if (elem.type == "text") {
         return elem.data.trim();
@@ -81,9 +74,6 @@ var simplifyKids = function(kids) {
             }
         });
     }
-
-    // if (simpleKids.length == 1)
-    //     return simpleKids[0];
     return simpleKids;
 }
 
