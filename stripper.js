@@ -41,7 +41,7 @@ exports.query = function(url, errorHandler, okHandler) {
             //     }
             
             //console.log(tagfreq);
-            console.log(elements);
+            //console.log(elements);
             //okHandler(elements.html());
             okHandler(JSON.stringify(simple, null, " "));
             }
@@ -52,15 +52,17 @@ var makeSimple = function(elem) {
     var simple = { }
 
     if (elem.type == "tag") {
-        simple.tag = elem.name;
-        if (notEmpty(elem.attribs)) simple.attribs = elem.attribs;
+
+        if (notEmpty(elem.attribs)) simple[elem.name] = elem.attribs;
+        else simple[elem.name] = {};
+
         var kids = simplifyKids(elem.children);
         if (kids && kids.length) {
             if (kids.length == 1 && kids[0].text) {
-                simple.text = kids[0].text;
+                simple[elem.name].text = kids[0].text;
             }
             else {
-                simple.children = kids;
+                simple[elem.name].children = kids;
             }
         }
     }
@@ -68,9 +70,15 @@ var makeSimple = function(elem) {
         var trimmed = elem.data.trim();
         if (trimmed) simple.text = trimmed;
     }
-    // else {
-    //     simple.unkown = elem;
-    // }
+    else if (elem.type == "comment") {
+        var trimmed = elem.data.trim();
+        if (trimmed) simple.comment = trimmed;
+    }
+    else {
+        var unkown = {}
+        unkown[elem.type] = elem;
+        console.log(unkown);
+    }
 
     return simple;
 }
