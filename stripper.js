@@ -31,16 +31,6 @@ exports.query = function(url, errorHandler, okHandler) {
 
             var simple = makeSimple($('body')[0]);
 
-            // var tagfreq = {};
-            // for (var i = 0; i < elements.length; i++) {
-            //     var elem = elements[i];
-            //     if (!tagfreq[elem.name])
-            //         tagfreq[elem.name] = 1;
-            //     else
-            //         tagfreq[elem.name]++;
-            //     }
-            
-            //console.log(tagfreq);
             //console.log(elements);
             //okHandler(elements.html());
             okHandler(JSON.stringify(simple, null, " "));
@@ -59,7 +49,7 @@ var makeSimple = function(elem) {
         var kids = simplifyKids(elem.children);
         if (kids && kids.length) {
             if (kids.length == 1 && kids[0].text) {
-                simple[elem.name].text = kids[0].text;
+                simple[elem.name] = kids[0].text;
             }
             else {
                 simple[elem.name].children = kids;
