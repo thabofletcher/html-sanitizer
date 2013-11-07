@@ -24,7 +24,7 @@ exports.query = function(url, errorHandler, okHandler) {
             $('center').remove();
             $('form').remove();
 
-            var elements = $('*');
+            //var elements = $('*');
             //elements.removeAttr('class');
             //elements.removeAttr('style');
             //elements.removeAttr('bgcolor');
