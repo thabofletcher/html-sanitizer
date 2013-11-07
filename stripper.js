@@ -25,7 +25,7 @@ exports.query = function(url, errorHandler, okHandler) {
             $('form').remove();
 
             var elements = $('*');
-            elements.removeAttr('class');
+            //elements.removeAttr('class');
             elements.removeAttr('style');
             elements.removeAttr('bgcolor');
 
@@ -43,22 +43,19 @@ var makeSimple = function(elem) {
 
     if (elem.type == "tag") {
 
-        if (notEmpty(elem.attribs)) simple[elem.name] = elem.attribs;
+        if (!empty(elem.attribs)) simple[elem.name] = elem.attribs;
         else simple[elem.name] = {};
 
         var kids = simplifyKids(elem.children);
         if (kids && kids.length) {
-            if (kids.length == 1 && kids[0].text) {
-                simple[elem.name] = kids[0].text;
-            }
-            else {
+            // if (empty(simple[elem.name]))
+            //     simple[elem.name] = kids;
+            // else
                 simple[elem.name].children = kids;
-            }
         }
     }
     else if (elem.type == "text") {
-        var trimmed = elem.data.trim();
-        if (trimmed) simple.text = trimmed;
+        return elem.data.trim();
     }
     else if (elem.type == "comment") {
         var trimmed = elem.data.trim();
@@ -79,15 +76,20 @@ var simplifyKids = function(kids) {
         kids.forEach(function(kid) {
             if (kid) {
                 var simpleKid = makeSimple(kid);
-                if (notEmpty(simpleKid)) simpleKids.push(simpleKid);
+                if (!empty(simpleKid)) 
+                    simpleKids.push(simpleKid);
             }
         });
     }
+
+    // if (simpleKids.length == 1)
+    //     return simpleKids[0];
     return simpleKids;
 }
 
-var notEmpty = function(obj) {
-    return Object.keys(obj).length > 0
+var empty = function(obj) {
+    if (typeof obj.length != 'undefined') return obj.length == 0;
+    return Object.keys(obj).length == 0;
 }
 
 
