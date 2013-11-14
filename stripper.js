@@ -1,10 +1,6 @@
 var request = require('request');
 var cheerio = require('cheerio');
 
-exports.stringify = function (data) {
-    return JSON.stringify(data, null, " ")
-}
-
 exports.query = function(url, errorHandler, okHandler) {
     request.get(url, function(err, resp, body) {
         if (err) {
@@ -31,7 +27,7 @@ exports.query = function(url, errorHandler, okHandler) {
             //elements.removeAttr('bgcolor');
 
             var simple = makeSimple($('body')[0]);
-            okHandler(exports.stringify((simple)));
+            okHandler(simple);
             }
         });
     }
