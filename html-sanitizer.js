@@ -1,20 +1,6 @@
-var request = require('request')
 var cheerio = require('cheerio')
 
-exports.query = function(url, errorHandler, okHandler) {
-    request.get(url, function(err, resp, body) {
-        if (err) {
-            errorHandler(err)
-            return
-        }
-
-        if (resp.statusCode == 200) {
-            exports.convert(body, okHandler)
-            }
-        })
-    }
-
-exports.convert = function(html, cb) {
+var convert = function(html, cb) {
     $ = cheerio.load(html)
     $('head').remove()
     $('script').remove()
@@ -36,32 +22,33 @@ exports.convert = function(html, cb) {
 }
 
 exports.json = function(html, cb) {
-    exports.convert(html, function(data) { cb(JSON.stringify(data, null, '  ')) })
+    convert(html, function(data) { cb(JSON.stringify(data, null, '  ')) })
 }
 
+exports.clean = function(html, cb) {
+    convert(html, function(obj){
+        var props = ''
 
-exports.clean = function(obj, cb) {
-    var props = ''
-
-    var getprops = function(obj) {
-        if (typeof obj === "string") {
-            props += obj.trim() + '<BR/>'
-        }
-        else {
-            for(var prop in obj) {
-                var kids = obj[prop].children
-                if (kids) {
-                    kids.forEach(function(kid) {
-                        getprops(kid)
-                    })
+        var getprops = function(obj) {
+            if (typeof obj === "string") {
+                props += obj.trim() + '\n'
+            }
+            else {
+                for(var prop in obj) {
+                    var kids = obj[prop].children
+                    if (kids) {
+                        kids.forEach(function(kid) {
+                            getprops(kid)
+                        })
+                    }
                 }
             }
         }
-    }
 
-    getprops(obj)
-    cb(props)
-    }
+        getprops(obj)
+        cb(props)
+    })
+}
 
 var makeSimple = function(elem) {
     var simple = { }
