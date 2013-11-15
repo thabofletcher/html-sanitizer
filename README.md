@@ -1,4 +1,4 @@
-jsonapifier
+html-sanitizer
 ===========
 
-Write a simple function to parse the request with cheerio, get a running JSON API endpoint.
+module to convert html into easy to automate JSON or easy to read text and html.
