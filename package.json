@@ -1,0 +1,21 @@
+{
+  "name": "jsonapifier",
+  "description": "html into node consumables",
+  "author": "Thabo Fletcher <_@tha.bo>",
+  "version": "0.0.3",
+  "dependencies": {
+    "lazy": "*"
+  },
+  "scripts": {
+  	"start": "node same.js"
+  },
+  "preferGlobal": "true",
+  "bin": {
+    "same" : "same.js"
+  },
+  "repository" : { 
+  	"type" : "git",
+  	"url" : "http://github.com/thabofletcher/same.git"
+  },
+  "engine": "node"
+}
