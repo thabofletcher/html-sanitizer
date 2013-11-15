@@ -1,21 +1,15 @@
 {
-  "name": "jsonapifier",
-  "description": "html into node consumables",
+  "name": "html-sanitizer",
+  "description": "html into nicer consumables",
   "author": "Thabo Fletcher <_@tha.bo>",
-  "version": "0.0.3",
+  "version": "0.0.2",
+  "main": "index.js",
   "dependencies": {
-    "lazy": "*"
-  },
-  "scripts": {
-  	"start": "node same.js"
-  },
-  "preferGlobal": "true",
-  "bin": {
-    "same" : "same.js"
+    "cheerio": "*"
   },
   "repository" : { 
   	"type" : "git",
-  	"url" : "http://github.com/thabofletcher/same.git"
+  	"url" : "http://github.com/thabofletcher/html-sanitizer.git"
   },
   "engine": "node"
 }
