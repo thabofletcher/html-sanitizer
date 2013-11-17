@@ -21,7 +21,8 @@ http.createServer(function  (request, response) {
 	        	write("{'response':'" + JSON.stringify(response) + "'}")
 	        else
 	        	if (request.headers.accept)
-	            sanitizer.json(body, write)//sanitizer.clean(body, write)
+	            sanitizer.load(body).query('body.0.id', write)
+	        	//sanitizer.load(body).json(write);
 	        });
 		}
 
