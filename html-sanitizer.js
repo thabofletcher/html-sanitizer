@@ -2,51 +2,78 @@ var cheerio = require('cheerio')
 
 exports.load = function(html, cb) {
     $ = cheerio.load(html)
-    $('head').remove()
-    $('script').remove()
-    $('textarea').remove()
-    $('select').remove()
-    $('input').remove()
-    $('font').remove()
-    $('style').remove()
-    $('center').remove()
-    $('form').remove()
+    // $('head').remove()
+    // $('script').remove()
+    // $('textarea').remove()
+    // $('select').remove()
+    // $('input').remove()
+    // $('font').remove()
+    // $('style').remove()
+    // $('center').remove()
+    // $('form').remove()
 
     //var elements = $('*')
     //elements.removeAttr('class')
     //elements.removeAttr('style')
     //elements.removeAttr('bgcolor')
 
-    var simple = makeSimple($('body')[0])
-    if (cb) cb(simple)
+    // var simple = makeSimple($('html')[0])
+    // if (cb) cb(simple)
 
     return {
+        obj : function(cb) {
+            cb(makeSimple($('html')[0]))
+        },
+
         json : function(cb) {
+            var simple = makeSimple($('html')[0])
             cb(JSON.stringify(simple, null, '  '))
         },
 
-        query : function(expression, cb) {
-            var terms = expression.split('.')
-        
-            var objptr = simple
-            terms.forEach(function(term){
-                if (typeof objptr[term] != 'undefined')
-                    objptr = objptr[term]
-                else if (objptr.children && typeof objptr.children[term] != 'undefined')
-                    objptr = objptr.children[term]
-                else {
-                    cb(JSON.stringify("Unable to find: " + term + " from " + expression, null, '  '))
-                    return;
-                }
+        query : function(selector, cb) {
+            var simple = {}
+            try {
+                simple = makeSimple($(selector)[0]);
+            }
+            catch(err) {
+                console.log(err)
+                simple = makeSimple($('html')[0]);
+            }
+            cb(simple)
 
-                // if (term === "first") {
-                //     objptr = objptr.children[0];
-                // }                
-            })
-            cb(JSON.stringify(objptr, null, '  '))
+
+
+            // var terms = expression.split('.')
+            // var err = '';
+        
+            // var objptr = simple
+            // terms.forEach(function(term){
+            //     if (typeof objptr[term] != 'undefined')
+            //         objptr = objptr[term]
+            //     else if (objptr.children && typeof objptr.children[term] != 'undefined')
+            //         objptr = objptr.children[term]
+            //     else {
+            //         err = "Unable to find: " + term + " from " + expression
+            //         if (cb) cb(JSON.stringify(err))
+            //         return //pruner;
+            //     }
+
+            //     // if (term === "first") {
+            //     //     objptr = objptr.children[0];
+            //     // }                
+            // })
+            // cb(JSON.stringify(objptr, null, '  '))
+
+            // return pruner;
+
+            // pruner : function(cb) {
+            //     var pruned = objptr
+            //     pruned.forEach(function(node){
+            // }
         },
 
         clean : function(cb) {
+            var simple = makeSimple($('html')[0])
             var props = ''
 
             var getprops = function(obj) {
@@ -75,11 +102,13 @@ exports.load = function(html, cb) {
 var makeSimple = function(elem) {
     var simple = { }
 
-    if (elem.type == "tag") {
-
+    var getattribs = function() {
         if (!empty(elem.attribs)) simple[elem.name] = elem.attribs
         else simple[elem.name] = {}
+    }
 
+    if (elem.type == "tag" || elem.type == "script") {
+        getattribs()
         var kids = simplifyKids(elem.children)
         if (kids && kids.length)
             simple[elem.name].children = kids
