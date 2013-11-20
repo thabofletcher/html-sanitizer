@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 var http = require('http');
-var sanitizer = require('./html-sanitizer.js');
+var sanitizer = require('./index.js');
 
 var s = function(obj) { return JSON.stringify(obj, null, '  ') }
 
@@ -41,8 +41,8 @@ http.createServer(function  (request, response) {
 
 		    	var writeJson = function(obj) { write(s(obj)) }
 
-		    	if (query) qo.query(query, writeJson)
-		    	else qo.obj(writeJson)
+		    	if (query) qo = qo.query(query)
+		    	qo.obj(writeJson)
 		    }
 		});
 	}

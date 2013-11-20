@@ -29,51 +29,59 @@ exports.load = function(html, options) {
     }
     else defaultFilter()
 
-    return {
-        obj : function(cb) {
-            cb(makeSimple($('html')[0]))
-        },
+    var formatter = function(selector) {
+        if (!selector) selector = 'html' 
+        return {
+            obj : function(cb) {
+                cb(simplifyKids($(selector)))
+            },
 
-        json : function(cb) {
-            var simple = makeSimple($('html')[0])
-            cb(JSON.stringify(simple, null, '  '))
-        },
+            json : function(cb) {
+                var simple = simplifyKids($(selector))
+                cb(JSON.stringify(simple, null, '  '))
+            },
 
-        query : function(selector, cb) {
-            var simple = {}
-            try {
-                simple = simplifyKids($(selector));
-            }
-            catch(err) {
-                console.log(err)
-                simple = makeSimple($('html')[0]);
-            }
-            cb(simple)
-        },
+            query : function(selector) {
+                return formatter(selector)
+            },
 
-        clean : function(cb) {
-            var simple = makeSimple($('html')[0])
-            var props = ''
+            // query : function(selector, cb) {
+            //     var simple = {}
+            //     try {
+            //         simple = simplifyKids($(selector));
+            //     }
+            //     catch(err) {
+            //         console.log(err)
+            //         simple = makeSimple($('html')[0]);
+            //     }
+            //     cb(simple)
+            // },
 
-            var getprops = function(obj) {
-                if (typeof obj === "string") {
-                    props += obj.trim() + '\n'
-                }
-                else {
-                    for(var prop in obj) {
-                        var kids = obj[prop].children
-                        if (kids) {
-                            kids.forEach(function(kid) {
-                                getprops(kid)
-                            })
+            clean : function(cb) {
+                var simple = simplifyKids($(selector))
+                var props = ''
+
+                var getprops = function(obj) {
+                    if (typeof obj === "string") {
+                        props += obj.trim() + '\n'
+                    }
+                    else {
+                        for(var prop in obj) {
+                            var kids = obj[prop].children
+                            if (kids) {
+                                kids.forEach(function(kid) {
+                                    getprops(kid)
+                                })
+                            }
                         }
                     }
                 }
+                getprops(simple)
+                cb(props)
             }
-            getprops(simple)
-            cb(props)
         }
     }
+    return formatter()
 }
 
 var makeSimple = function(elem) {
