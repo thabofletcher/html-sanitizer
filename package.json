@@ -2,7 +2,7 @@
   "name": "html-sanitizer",
   "description": "html into nicer consumables",
   "author": "Thabo Fletcher <_@tha.bo>",
-  "version": "0.0.2",
+  "version": "0.0.4",
   "main": "index.js",
   "dependencies": {
     "cheerio": "*"

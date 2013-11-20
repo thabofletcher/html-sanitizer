@@ -42,7 +42,7 @@ exports.load = function(html, options) {
         query : function(selector, cb) {
             var simple = {}
             try {
-                simple = makeSimple($(selector)[0]);
+                simple = simplifyKids($(selector));
             }
             catch(err) {
                 console.log(err)
@@ -112,13 +112,14 @@ var makeSimple = function(elem) {
 var simplifyKids = function(kids) {
     var simpleKids = []
     if (kids) {
-        kids.forEach(function(kid) {
+        for (var i=0; i<kids.length; i++) {
+            var kid = kids[i];
             if (kid) {
                 var simpleKid = makeSimple(kid)
                 if (!empty(simpleKid)) 
                     simpleKids.push(simpleKid)
             }
-        })
+        }
     }
     return simpleKids
 }
