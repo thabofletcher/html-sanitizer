@@ -1,78 +1,109 @@
 var cheerio = require('cheerio')
 
-var convert = function(html, cb) {
+exports.load = function(html, options) {
     $ = cheerio.load(html)
-    $('head').remove()
-    $('script').remove()
-    $('textarea').remove()
-    $('select').remove()
-    $('input').remove()
-    $('font').remove()
-    $('style').remove()
-    $('center').remove()
-    $('form').remove()
+    var elements = $('*')
 
-    //var elements = $('*')
-    //elements.removeAttr('class')
-    //elements.removeAttr('style')
-    //elements.removeAttr('bgcolor')
+    var defaultFilter = function() {
+        $('script').remove()
+        $('textarea').remove()
+        $('select').remove()
+        $('input').remove()
+        $('font').remove()
+        $('style').remove()
+        $('center').remove()
+        $('form').remove()
 
-    var simple = makeSimple($('body')[0])
-    cb(simple)
-}
+        elements.removeAttr('style')
+        elements.removeAttr('bgcolor')
+    }
 
-exports.json = function(html, cb) {
-    convert(html, function(data) { cb(JSON.stringify(data, null, '  ')) })
-}
+    if (options) {
+        if (options.filter) {
+            if (options.filter.elems)
+                options.filter.elems.forEach(function(elem) { $(elem).remove() })
+            if (options.filter.attribs)
+                options.filter.attribs.forEach(function(attrib) { elements.removeAttr(attrib) })
+        }
+        else defaultFilter()
+    }
+    else defaultFilter()
 
-exports.clean = function(html, cb) {
-    convert(html, function(obj){
-        var props = ''
+    return {
+        obj : function(cb) {
+            cb(makeSimple($('html')[0]))
+        },
 
-        var getprops = function(obj) {
-            if (typeof obj === "string") {
-                props += obj.trim() + '\n'
+        json : function(cb) {
+            var simple = makeSimple($('html')[0])
+            cb(JSON.stringify(simple, null, '  '))
+        },
+
+        query : function(selector, cb) {
+            var simple = {}
+            try {
+                simple = simplifyKids($(selector));
             }
-            else {
-                for(var prop in obj) {
-                    var kids = obj[prop].children
-                    if (kids) {
-                        kids.forEach(function(kid) {
-                            getprops(kid)
-                        })
+            catch(err) {
+                console.log(err)
+                simple = makeSimple($('html')[0]);
+            }
+            cb(simple)
+        },
+
+        clean : function(cb) {
+            var simple = makeSimple($('html')[0])
+            var props = ''
+
+            var getprops = function(obj) {
+                if (typeof obj === "string") {
+                    props += obj.trim() + '\n'
+                }
+                else {
+                    for(var prop in obj) {
+                        var kids = obj[prop].children
+                        if (kids) {
+                            kids.forEach(function(kid) {
+                                getprops(kid)
+                            })
+                        }
                     }
                 }
             }
+            getprops(simple)
+            cb(props)
         }
-
-        getprops(obj)
-        cb(props)
-    })
+    }
 }
 
 var makeSimple = function(elem) {
     var simple = { }
 
-    if (elem.type == "tag") {
-
+    var getattribs = function() {
         if (!empty(elem.attribs)) simple[elem.name] = elem.attribs
         else simple[elem.name] = {}
+    }
 
-        var kids = simplifyKids(elem.children)
-        if (kids && kids.length)
-            simple[elem.name].children = kids
-    }
-    else if (elem.type == "text") {
-        return elem.data.trim()
-    }
-    else if (elem.type == "comment") {
-        var trimmed = elem.data.trim()
-        if (trimmed) simple.comment = trimmed
-    }
-    else {
-        var unkown = {}
-        unkown[elem.type] = elem
-        console.log(unkown)
+    switch (elem.type) {
+        case "tag":
+        case "script":
+        case "style":
+            getattribs()
+            var kids = simplifyKids(elem.children)
+            if (kids && kids.length)
+                simple[elem.name].children = kids
+            break
+        case "text":
+            return elem.data.trim()
+        case "comment":
+            var trimmed = elem.data.trim()
+            if (trimmed) simple.comment = trimmed
+            break
+        default:
+            var unkown = {}
+            unkown[elem.type] = elem
+            console.log(unkown)
+            break
     }
 
     return simple
@@ -81,13 +112,14 @@ var makeSimple = function(elem) {
 var simplifyKids = function(kids) {
     var simpleKids = []
     if (kids) {
-        kids.forEach(function(kid) {
+        for (var i=0; i<kids.length; i++) {
+            var kid = kids[i];
             if (kid) {
                 var simpleKid = makeSimple(kid)
                 if (!empty(simpleKid)) 
                     simpleKids.push(simpleKid)
             }
-        })
+        }
     }
     return simpleKids
 }
