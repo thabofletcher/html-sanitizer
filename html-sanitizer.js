@@ -1,24 +1,33 @@
 var cheerio = require('cheerio')
 
-exports.load = function(html, cb) {
+exports.load = function(html, options) {
     $ = cheerio.load(html)
-    // $('head').remove()
-    // $('script').remove()
-    // $('textarea').remove()
-    // $('select').remove()
-    // $('input').remove()
-    // $('font').remove()
-    // $('style').remove()
-    // $('center').remove()
-    // $('form').remove()
+    var elements = $('*')
 
-    //var elements = $('*')
-    //elements.removeAttr('class')
-    //elements.removeAttr('style')
-    //elements.removeAttr('bgcolor')
+    var defaultFilter = function() {
+        $('script').remove()
+        $('textarea').remove()
+        $('select').remove()
+        $('input').remove()
+        $('font').remove()
+        $('style').remove()
+        $('center').remove()
+        $('form').remove()
 
-    // var simple = makeSimple($('html')[0])
-    // if (cb) cb(simple)
+        elements.removeAttr('style')
+        elements.removeAttr('bgcolor')
+    }
+
+    if (options) {
+        if (options.filter) {
+            if (options.filter.elems)
+                options.filter.elems.forEach(function(elem) { $(elem).remove() })
+            if (options.filter.attribs)
+                options.filter.attribs.forEach(function(attrib) { elements.removeAttr(attrib) })
+        }
+        else defaultFilter()
+    }
+    else defaultFilter()
 
     return {
         obj : function(cb) {
@@ -40,36 +49,6 @@ exports.load = function(html, cb) {
                 simple = makeSimple($('html')[0]);
             }
             cb(simple)
-
-
-
-            // var terms = expression.split('.')
-            // var err = '';
-        
-            // var objptr = simple
-            // terms.forEach(function(term){
-            //     if (typeof objptr[term] != 'undefined')
-            //         objptr = objptr[term]
-            //     else if (objptr.children && typeof objptr.children[term] != 'undefined')
-            //         objptr = objptr.children[term]
-            //     else {
-            //         err = "Unable to find: " + term + " from " + expression
-            //         if (cb) cb(JSON.stringify(err))
-            //         return //pruner;
-            //     }
-
-            //     // if (term === "first") {
-            //     //     objptr = objptr.children[0];
-            //     // }                
-            // })
-            // cb(JSON.stringify(objptr, null, '  '))
-
-            // return pruner;
-
-            // pruner : function(cb) {
-            //     var pruned = objptr
-            //     pruned.forEach(function(node){
-            // }
         },
 
         clean : function(cb) {
@@ -97,8 +76,6 @@ exports.load = function(html, cb) {
     }
 }
 
-
-
 var makeSimple = function(elem) {
     var simple = { }
 
@@ -107,23 +84,26 @@ var makeSimple = function(elem) {
         else simple[elem.name] = {}
     }
 
-    if (elem.type == "tag" || elem.type == "script") {
-        getattribs()
-        var kids = simplifyKids(elem.children)
-        if (kids && kids.length)
-            simple[elem.name].children = kids
-    }
-    else if (elem.type == "text") {
-        return elem.data.trim()
-    }
-    else if (elem.type == "comment") {
-        var trimmed = elem.data.trim()
-        if (trimmed) simple.comment = trimmed
-    }
-    else {
-        var unkown = {}
-        unkown[elem.type] = elem
-        console.log(unkown)
+    switch (elem.type) {
+        case "tag":
+        case "script":
+        case "style":
+            getattribs()
+            var kids = simplifyKids(elem.children)
+            if (kids && kids.length)
+                simple[elem.name].children = kids
+            break
+        case "text":
+            return elem.data.trim()
+        case "comment":
+            var trimmed = elem.data.trim()
+            if (trimmed) simple.comment = trimmed
+            break
+        default:
+            var unkown = {}
+            unkown[elem.type] = elem
+            console.log(unkown)
+            break
     }
 
     return simple

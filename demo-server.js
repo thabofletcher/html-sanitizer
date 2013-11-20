@@ -2,7 +2,6 @@
 var http = require('http');
 var sanitizer = require('./html-sanitizer.js');
 
-
 var s = function(obj) { return JSON.stringify(obj, null, '  ') }
 
 http.createServer(function  (request, response) {
@@ -21,13 +20,15 @@ http.createServer(function  (request, response) {
 
 		var firstQ = url.indexOf('?')
 		if (firstQ != -1) {
-			var nextQ = url.indexOf('?', firstQ)
+			var nextQ = url.indexOf('?', firstQ+1)
 			
 			if (nextQ != firstQ) {
-				query = url.substr(nextQ)
+				query = url.substr(nextQ+1)
 				url = url.substr(0, nextQ)
 			}
-			else query = url.substr(firstQ)
+			else query = url.substr(firstQ+1)
+
+			query = unescape(query)
 		}
 
 		extReq.get(url, function(err, resp, body) {
@@ -40,12 +41,9 @@ http.createServer(function  (request, response) {
 
 		    	var writeJson = function(obj) { write(s(obj)) }
 
-		    	if (query) qo.query(unescape(query.substr(1)), writeJson)
+		    	if (query) qo.query(query, writeJson)
 		    	else qo.obj(writeJson)
 		    }
-		    	//if (request.headers.accept)
-		        
-		    	//sanitizer.load(body).json(write);
 		});
 	}
 
